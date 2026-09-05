@@ -151,7 +151,6 @@ Use **Try it out** and **Execute** to create, read, update, and delete a task th
 
 ### Swagger screenshot
 
-After testing a successful endpoint in Swagger, save a screenshot as `docs/swagger-screenshot.png`, then replace the line below with the image Markdown.
 
 ![Swagger UI screenshot](docs/swagger_post_response.png)
 
