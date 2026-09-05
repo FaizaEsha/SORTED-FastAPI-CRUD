@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A calm, personal task dashboard powered by a FastAPI CRUD API." />
+    <title>SORTED.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="hero">
+        <p class="eyebrow">A quiet place for your priorities</p>
+        <div class="hero-row">
+          <h1>SORT<em>ED.</em></h1>
+          <p class="hero-note">A considered to-do list<br />for the things that matter.</p>
+        </div>
+      </header>
+
+      <section class="task-card" aria-labelledby="task-heading">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Today’s list</p>
+            <h2 id="task-heading">Make room for the good things.</h2>
+          </div>
+          <span id="task-count" class="task-count" aria-live="polite"></span>
+        </div>
+
+        <form id="new-task-form" class="new-task-form">
+          <label class="sr-only" for="new-task-title">New task</label>
+          <input id="new-task-title" name="title" maxlength="120" placeholder="What would you like to make happen?" required />
+          <button type="submit">Add task <span aria-hidden="true">↗</span></button>
+        </form>
+
+        <p id="message" class="message" role="status"></p>
+        <ul id="task-list" class="task-list" aria-live="polite"></ul>
+      </section>
+
+      <footer><span>IN MEMORY · MADE WITH FASTAPI</span><a href="/docs" target="_blank" rel="noreferrer">Explore API docs ↗</a></footer>
+    </main>
+    <template id="task-template">
+      <li class="task-item">
+        <label class="check-wrap"><input class="task-check" type="checkbox" /><span class="checkmark" aria-hidden="true">✓</span><span class="sr-only">Mark task complete</span></label>
+        <span class="task-title"></span>
+        <button class="delete-button" type="button" aria-label="Delete task">Remove</button>
+      </li>
+    </template>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
