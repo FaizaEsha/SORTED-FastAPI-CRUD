@@ -1,116 +1,86 @@
 # ✦ SORTED.
 
-> A quiet, considered to-do list — built as a FastAPI CRUD API, with a small browser space for the things that matter.
+> A quiet, considered to-do list, built as a FastAPI CRUD API, with a small browser space for the things that matter.
 
-**SORTED.** is a Week 2 backend assignment for **FlyRank AI**. At its heart is a deliberately small, in-memory Task API: it can create, read, update, and delete tasks. A lightweight beige, brown, and black dashboard sits on top, so the same API can also be useful in daily life.
+**SORTED.** is an Assignment for FlyRank's Backend AI Engineering Track (Week 2 — *Build your first CRUD API*). At its core is a deliberately small, in-memory Task API: create, read, update, and delete tasks, with all four CRUD operations mapped cleanly onto their HTTP methods. A lightweight beige, brown, and black dashboard sits on top, so the same API is genuinely usable, not just a set of endpoints on paper.
 
-It was built to make the request → response loop feel tangible: one task, one endpoint, one clear answer at a time.
+It was built to make the request → response loop feel tangible — one task, one endpoint, one clear answer at a time.
 
 ---
 
 ## ✦ Highlights
 
-- ✅ **Complete CRUD API** — create, list, read, update, and delete tasks
+- ✅ **Full CRUD** — create, list, read, update, and delete tasks
 - 🐍 **Python + FastAPI** — an approachable backend framework with automatic docs
-- 📚 **Swagger UI** — interactive API documentation and testing at `/docs`
-- 🧠 **In-memory storage only** — exactly as required for Week 2; no database or files
+- 📛 **Correct status codes throughout** — `200`, `201`, `204`, `400`, `404`, each with a clear JSON error where it applies
+- 🛡️ **Server-side validation** — a missing or empty title is rejected before it ever reaches the list
+- 📚 **Swagger UI** — interactive docs and a full "Try it out" CRUD cycle at `/docs`
+- 🧠 **In-memory storage, on purpose** — no database yet; restarting resets the list, and that's the lesson, not a bug
 - 🎨 **SORTED. dashboard** — a responsive personal task interface at `/app`
-- ✓ **Completion checkmarks** — mark a task as done through the real `PUT` endpoint
-- 🧪 **curl-testable** — every core endpoint can be tested from the terminal
+- 🧪 **curl-testable** — every endpoint verified from the terminal, not just the browser
 
 ---
 
 ## 🛠️ Built With
 
-- **Python 3.10+** — programming language
-- **FastAPI** — API framework
-- **Uvicorn** — local development server
-- **HTML, CSS, and JavaScript** — the small SORTED. dashboard
+- **Python 3.10+**
+- **FastAPI** — API framework, with OpenAPI/Swagger built in
+- **Uvicorn** — local dev server
+- **HTML, CSS, and JavaScript** — the SORTED. dashboard
 
 ---
 
-## ⚙️ Getting Started
+## 🚀 Run It
 
-1. Clone the repository and enter the project folder.
+```bash
+git clone https://github.com/FaizaEsha/SORTED-FastAPI-CRUD.git
+cd SORTED-FastAPI-CRUD
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1        # macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-   ```bash
-   git clone <this-repository-url>
-   cd sorted-fastapi-crud
-   ```
+Then start the server — **this is the one command that runs everything**:
 
-2. Create and activate a virtual environment.
+```bash
+uvicorn main:app --reload
+```
 
-   ```powershell
-   py -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
+| Page | Address |
+|---|---|
+| API front door | `http://127.0.0.1:8000/` |
+| SORTED. dashboard | `http://127.0.0.1:8000/app` |
+| Swagger UI | `http://127.0.0.1:8000/docs` |
+| Health check | `http://127.0.0.1:8000/health` |
 
-3. Install the project packages.
-
-   ```powershell
-   pip install -r requirements.txt
-   ```
-
-4. Start the local server.
-
-   ```powershell
-   uvicorn main:app --reload
-   ```
-
-5. Visit these local addresses.
-
-   - Required API front door: `http://127.0.0.1:8000/`
-   - SORTED. dashboard: `http://127.0.0.1:8000/app`
-   - Swagger UI: `http://127.0.0.1:8000/docs`
-   - Health check: `http://127.0.0.1:8000/health`
-
-Stop the server with `Ctrl + C`. Restarting it returns the list to its three original tasks.
+Stop with `Ctrl + C`. Restart it and the list returns to its three original tasks — see [The Mortality Experiment](#️-the-mortality-experiment).
 
 ---
 
 ## 🔗 API Endpoints
 
-| Method | Path | What it does | Success |
-| --- | --- | --- | --- |
-| `GET` | `/` | Describes the API | `200` + API JSON |
-| `GET` | `/health` | Checks that the server is alive | `200` + `{"status":"ok"}` |
-| `GET` | `/tasks` | Returns every task | `200` + task list |
-| `GET` | `/tasks/{id}` | Returns one task | `200` + task |
-| `POST` | `/tasks` | Creates a task | `201` + created task |
-| `PUT` | `/tasks/{id}` | Changes a task's title, done status, or both | `200` + updated task |
-| `DELETE` | `/tasks/{id}` | Removes a task | `204 No Content` |
+| Method | Path | What it does | Success | Errors |
+|---|---|---|---|---|
+| `GET` | `/` | Describes the API | `200` | — |
+| `GET` | `/health` | Checks the server is alive | `200` `{"status":"ok"}` | — |
+| `GET` | `/tasks` | Returns every task | `200` + list | — |
+| `GET` | `/tasks/{id}` | Returns one task | `200` + task | `404` unknown id |
+| `POST` | `/tasks` | Creates a task | `201` + created task | `400` missing/empty title |
+| `PUT` | `/tasks/{id}` | Updates title and/or done | `200` + updated task | `400` invalid body · `404` unknown id |
+| `DELETE` | `/tasks/{id}` | Removes a task | `204 No Content` | `404` unknown id |
 
-When an ID does not exist, the API returns `404` with a clear JSON response:
-
+Every error returns a plain JSON message, e.g.:
 ```json
 { "error": "Task 99 not found" }
 ```
 
-### Request examples
-
-Create a task:
-
-```json
-{ "title": "Send the Week 2 assignment" }
-```
-
-Mark task 1 as complete:
-
-```json
-{ "done": true }
-```
-
 ---
 
-## 🧪 Testing with curl
+## 🧪 Tested with curl
 
-With the server running, open a second terminal and run:
-
-```powershell
-curl.exe -i http://127.0.0.1:8000/tasks
+```bash
+curl -i http://127.0.0.1:8000/tasks
 ```
-
-Example output:
 
 ```text
 HTTP/1.1 200 OK
@@ -123,34 +93,19 @@ content-type: application/json
 ]
 ```
 
-For a `POST` or `PUT` request in Windows PowerShell, put the JSON body in a small temporary file first. For example, create `create-task.json` containing:
-
-```json
-{ "title": "Practice CRUD" }
-```
-
-Then create the task with curl:
-
+Creating a task (PowerShell — write the body to a temp file first):
 ```powershell
 curl.exe -i -X POST http://127.0.0.1:8000/tasks -H "Content-Type: application/json" --data-binary "@create-task.json"
 ```
-
-Delete the temporary JSON file after testing; it is not part of the project.
+```json
+{ "title": "Practice CRUD" }
+```
 
 ---
 
 ## 📚 Swagger UI
 
-FastAPI automatically provides interactive API documentation at:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-Use **Try it out** and **Execute** to create, read, update, and delete a task through the browser.
-
-### Swagger screenshot
-
+FastAPI generates interactive docs automatically at `/docs` — no setup required. Every endpoint is listed, and the full create → read → update → delete cycle works through **Try it out**, no curl needed.
 
 ![Swagger UI screenshot](docs/swagger_post_response.png)
 
@@ -163,7 +118,7 @@ Use **Try it out** and **Execute** to create, read, update, and delete a task th
 │   ├── index.html       # SORTED. dashboard structure
 │   ├── styles.css       # Beige, brown, and black responsive styling
 │   └── app.js           # Frontend requests to the FastAPI CRUD endpoints
-├── main.py              # Models, seed tasks, routes, validation, and error handling
+├── main.py              # Models, seed tasks, routes, validation, error handling
 ├── requirements.txt     # FastAPI and Uvicorn
 ├── .gitignore
 └── README.md
@@ -171,29 +126,30 @@ Use **Try it out** and **Execute** to create, read, update, and delete a task th
 
 ---
 
-## 🎯 What I Learned
+## 🕯️ The Mortality Experiment
 
-- Mapping CRUD actions to `POST`, `GET`, `PUT`, and `DELETE`
-- Returning the correct HTTP statuses: `200`, `201`, `204`, `400`, and `404`
-- Writing server-side validation instead of trusting user input
-- Using Swagger UI to document and test an API
-- Keeping data in memory and understanding why it resets after a restart
-- Connecting a simple frontend to a backend API using `fetch`
+I created a few tasks, stopped the server, and started it again. The new tasks disappeared and the three seed tasks came back — because the task list lives only in the server's memory, and stopping the server clears it. That's intentional: this assignment is about learning CRUD cleanly before a database enters the picture.
 
 ---
 
-## 🕯️ The Mortality Experiment
+## 🎯 What I Learned
 
-I created tasks, stopped the server, and started it again. The added tasks disappeared and the three seed tasks returned because the task list exists only in the server's memory; when the server stops, that memory is cleared.
-
-This is intentional. Week 2 is about learning CRUD before adding a database in a later week.
+- Mapping CRUD to `POST`, `GET`, `PUT`, and `DELETE`, and choosing the right status code for each outcome
+- Writing server-side validation instead of trusting the client
+- Using Swagger UI to both document and test an API
+- Why in-memory data resets on restart — and why that's a feature at this stage, not a flaw
+- Wiring a small frontend to a backend API with `fetch`
 
 ---
 
 ## Note
 
-SORTED. is an academic project designed to run locally. It does not use a database, accounts, authentication, or cloud deployment, because those would distract from the Week 2 CRUD API learning goal.
+Built to run locally as part of FlyRank's Backend AI Engineering Track. No database, accounts, authentication, or cloud deployment deliberately, since those would distract from the CRUD learning goal of this stage.
+
+## Author
+
+**Faiza Ahmed Esha**
 
 ## License
 
-Open for learning purposes. Feel free to fork, study, and build on it.
+You're welcome to clone this, run it locally, and test it end to end, that's the best way to see how the CRUD cycle actually behaves. Please don't submit this code, or a lightly edited copy of it, as your own coursework; use it to learn from, not to hand in.
