@@ -2,9 +2,11 @@
 
 > A quiet, considered to-do list, built as a FastAPI CRUD API with a SQLite memory, and a small browser space for the things that matter.
 
-**SORTED.** is an Assignment for FlyRank's Backend AI Engineering Track (Week 2 — *Build your first CRUD API*, then upgraded with a real database). At its core is a deliberately small Task API: create, read, update, and delete tasks, with all four CRUD operations mapped cleanly onto their HTTP methods. A lightweight beige, brown, and black dashboard sits on top, so the same API is genuinely usable, not just a set of endpoints on paper.
+**SORTED.** is a to-do list that keeps its promises. Add a task, tick it off, change your mind, delete it, and it all happens through a clean FastAPI backend where every request gets one clear answer.
 
-It started as a whiteboard (tasks in memory, wiped on every restart) and grew into a notebook (tasks saved in SQLite, still there tomorrow). Same endpoints, same behavior, just a memory that lasts.
+Under the hood is a small, tidy Task API with full CRUD: create, read, update, and delete, each mapped to the right HTTP method and status code. On top sits a clean, responsive dashboard, so it's a tool you'd actually want to open, not just a set of endpoints on paper.
+
+It began as a whiteboard: tasks lived in memory and vanished on every restart. Now it's a notebook: tasks are saved in SQLite and are still there tomorrow. Same endpoints, same behavior, just a memory that lasts. ✦
 
 ---
 
