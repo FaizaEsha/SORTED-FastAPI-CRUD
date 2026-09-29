@@ -1,5 +1,6 @@
 """A small in-memory CRUD API for a personal to-do list."""
-
+import sqlite3
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Annotated
 
@@ -21,7 +22,8 @@ app = FastAPI(
 
 STATIC_DIRECTORY = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIRECTORY), name="static")
-
+# The database is just one file, created automatically next to main.py.
+DB_PATH = Path(__file__).parent / "tasks.db"
 
 class TaskCreate(BaseModel):
     """The information needed to create a task."""
@@ -51,6 +53,46 @@ tasks: list[Task] = [
     Task(id=3, title="Take an evening walk", done=True),
 ]
 
+
+@contextmanager
+def get_db():
+    """Open the database, save changes when done, and always close it."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+def init_db() -> None:
+    """Create the table if missing, and seed 3 tasks only if it is empty."""
+    with get_db() as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                done INTEGER NOT NULL DEFAULT 0
+            )
+            """
+        )
+        count = conn.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
+        if count == 0:
+            conn.executemany(
+                "INSERT INTO tasks (title, done) VALUES (?, ?)",
+                [
+                    ("Plan the week", 0),
+                    ("Finish FastAPI assignment", 0),
+                    ("Take an evening walk", 1),
+                ],
+            )
+
+
+init_db()
 
 def get_task_or_404(task_id: int) -> Task | JSONResponse:
     """Return one task, or raise the API's consistent JSON 404 error."""
