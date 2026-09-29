@@ -1,10 +1,10 @@
 # ✦ SORTED.
 
-> A quiet, considered to-do list, built as a FastAPI CRUD API, with a small browser space for the things that matter.
+> A quiet, considered to-do list, built as a FastAPI CRUD API with a SQLite memory, and a small browser space for the things that matter.
 
-**SORTED.** is an Assignment for FlyRank's Backend AI Engineering Track (Week 2 — *Build your first CRUD API*). At its core is a deliberately small, in-memory Task API: create, read, update, and delete tasks, with all four CRUD operations mapped cleanly onto their HTTP methods. A lightweight beige, brown, and black dashboard sits on top, so the same API is genuinely usable, not just a set of endpoints on paper.
+**SORTED.** is an Assignment for FlyRank's Backend AI Engineering Track (Week 2 — *Build your first CRUD API*, then upgraded with a real database). At its core is a deliberately small Task API: create, read, update, and delete tasks, with all four CRUD operations mapped cleanly onto their HTTP methods. A lightweight beige, brown, and black dashboard sits on top, so the same API is genuinely usable, not just a set of endpoints on paper.
 
-It was built to make the request → response loop feel tangible — one task, one endpoint, one clear answer at a time.
+It started as a whiteboard (tasks in memory, wiped on every restart) and grew into a notebook (tasks saved in SQLite, still there tomorrow). Same endpoints, same behavior, just a memory that lasts.
 
 ---
 
@@ -13,9 +13,9 @@ It was built to make the request → response loop feel tangible — one task, o
 - ✅ **Full CRUD** — create, list, read, update, and delete tasks
 - 🐍 **Python + FastAPI** — an approachable backend framework with automatic docs
 - 📛 **Correct status codes throughout** — `200`, `201`, `204`, `400`, `404`, each with a clear JSON error where it applies
-- 🛡️ **Server-side validation** — a missing or empty title is rejected before it ever reaches the list
+- 🛡️ **Server-side validation** — a missing or empty title is rejected before it ever reaches the database
 - 📚 **Swagger UI** — interactive docs and a full "Try it out" CRUD cycle at `/docs`
-- 🧠 **In-memory storage, on purpose** — no database yet; restarting resets the list, and that's the lesson, not a bug
+- 🗄️ **SQLite storage** — data survives restarts, kept safe with parameterized `?` queries
 - 🎨 **SORTED. dashboard** — a responsive personal task interface at `/app`
 - 🧪 **curl-testable** — every endpoint verified from the terminal, not just the browser
 
@@ -25,6 +25,7 @@ It was built to make the request → response loop feel tangible — one task, o
 
 - **Python 3.10+**
 - **FastAPI** — API framework, with OpenAPI/Swagger built in
+- **SQLite** — a single-file database, built right into Python (`sqlite3`)
 - **Uvicorn** — local dev server
 - **HTML, CSS, and JavaScript** — the SORTED. dashboard
 
@@ -53,7 +54,7 @@ uvicorn main:app --reload
 | Swagger UI | `http://127.0.0.1:8000/docs` |
 | Health check | `http://127.0.0.1:8000/health` |
 
-Stop with `Ctrl + C`. Restart it and the list returns to its three original tasks — see [The Mortality Experiment](#️-the-mortality-experiment).
+Stop with `Ctrl + C`. Restarting keeps your data, which lives in `tasks.db` — see The Mortality Experiment below.
 
 ---
 
@@ -73,6 +74,27 @@ Every error returns a plain JSON message, e.g.:
 ```json
 { "error": "Task 99 not found" }
 ```
+
+---
+
+## 🗄️ Database (SQLite)
+
+**Why SQLite?** It is a single file with zero setup, needs no separate server, and keeps data after the server restarts. Perfect for a project this size.
+
+**Where is the database?** `tasks.db` in the project folder. It is created automatically on first run (the table plus 3 starter tasks, seeded only once) and it is git-ignored, so every clone starts fresh.
+
+**How is it kept safe?** Every query uses `?` placeholders instead of gluing user text into SQL, so a sneaky title can't turn into a sneaky command.
+
+**Run it:**
+
+```bash
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+**SQL I ran by hand:** `SELECT COUNT(*) FROM tasks;` returned `3`, the number of tasks in the table.
+
+![DB Browser screenshot](docs/db_browser.png)
 
 ---
 
@@ -118,7 +140,9 @@ FastAPI generates interactive docs automatically at `/docs` — no setup require
 │   ├── index.html       # SORTED. dashboard structure
 │   ├── styles.css       # Beige, brown, and black responsive styling
 │   └── app.js           # Frontend requests to the FastAPI CRUD endpoints
-├── main.py              # Models, seed tasks, routes, validation, error handling
+├── docs/                # Screenshots (Swagger UI, DB Browser)
+├── main.py              # Models, database setup, routes, validation, error handling
+├── tasks.db             # created automatically, git-ignored
 ├── requirements.txt     # FastAPI and Uvicorn
 ├── .gitignore
 └── README.md
@@ -128,7 +152,7 @@ FastAPI generates interactive docs automatically at `/docs` — no setup require
 
 ## 🕯️ The Mortality Experiment
 
-I created a few tasks, stopped the server, and started it again. The new tasks disappeared and the three seed tasks came back — because the task list lives only in the server's memory, and stopping the server clears it. That's intentional: this assignment is about learning CRUD cleanly before a database enters the picture.
+Round one: tasks lived in the server's memory, so every restart wiped them and the three seed tasks came back. Round two, with SQLite: I created a few tasks, stopped the server, and started it again. This time they were all still there, because they live in `tasks.db` on disk, not in the server's head. The list finally outlives the server. That was the whole point of adding a database.
 
 ---
 
@@ -137,14 +161,16 @@ I created a few tasks, stopped the server, and started it again. The new tasks d
 - Mapping CRUD to `POST`, `GET`, `PUT`, and `DELETE`, and choosing the right status code for each outcome
 - Writing server-side validation instead of trusting the client
 - Using Swagger UI to both document and test an API
-- Why in-memory data resets on restart — and why that's a feature at this stage, not a flaw
+- Moving storage from memory to SQLite without changing a single endpoint's behavior
+- Using parameterized `?` queries, and seeding data only once so restarts never create duplicates
+- Reading and editing real rows by hand with SQL in DB Browser
 - Wiring a small frontend to a backend API with `fetch`
 
 ---
 
 ## Note
 
-Built to run locally as part of FlyRank's Backend AI Engineering Track. No database, accounts, authentication, or cloud deployment deliberately, since those would distract from the CRUD learning goal of this stage.
+Built to run locally as part of FlyRank's Backend AI Engineering Track. Storage is a single SQLite file on purpose. No accounts, authentication, or cloud deployment, since those would distract from the CRUD and database learning goals of this stage.
 
 ## Author
 
