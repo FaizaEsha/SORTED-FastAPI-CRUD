@@ -1,4 +1,4 @@
-"""A small in-memory CRUD API for a personal to-do list."""
+"""A small SQLite-backed CRUD API for a personal to-do list."""
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
@@ -14,8 +14,8 @@ from pydantic import BaseModel, Field
 app = FastAPI(
     title="Classy Tasks API",
     description=(
-        "A beginner-friendly CRUD API. Tasks live only in memory, so restarting "
-        "the server restores the three starter tasks."
+        "A beginner-friendly CRUD API. Tasks are stored in a SQLite database"
+        "(tasks.db), so they survive server restarts."
     ),
     version="1.0.0",
 )
@@ -139,7 +139,7 @@ def health_check() -> dict[str, str]:
 )
 def list_tasks() -> list[Task]:
     with get_db() as conn:
-        rows = conn.execute("SELECT * FROM tasks").fetchall()
+        rows = conn.execute("SELECT * FROM tasks ORDER BY id").fetchall()
     return [row_to_task(row) for row in rows]
 @app.get(
     "/tasks/{task_id}",
@@ -210,7 +210,7 @@ def update_task(
     status_code=status.HTTP_204_NO_CONTENT,
     tags=["Tasks"],
     summary="Delete a task",
-    description="Removes a task permanently from the current in-memory list.",
+    description="Removes a task permanently from the SQLite database.",
     responses={404: {"description": "Task not found"}},
 )
 def delete_task(task_id: Annotated[int, PathParameter(ge=1, description="The task ID")]) -> Response:
