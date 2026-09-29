@@ -94,12 +94,18 @@ def init_db() -> None:
 
 init_db()
 
+def row_to_task(row: sqlite3.Row) -> Task:
+    """Turn a database row into a Task (done is stored as 0/1, so convert it)."""
+    return Task(id=row["id"], title=row["title"], done=bool(row["done"]))
+
+
 def get_task_or_404(task_id: int) -> Task | JSONResponse:
-    """Return one task, or raise the API's consistent JSON 404 error."""
-    for task in tasks:
-        if task.id == task_id:
-            return task
-    return JSONResponse(status_code=404, content={"error": f"Task {task_id} not found"})
+    """Return one task from the database, or the API's consistent JSON 404 error."""
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    if row is None:
+        return JSONResponse(status_code=404, content={"error": f"Task {task_id} not found"})
+    return row_to_task(row)
 
 
 @app.exception_handler(RequestValidationError)
@@ -136,9 +142,9 @@ def health_check() -> dict[str, str]:
     description="Returns all tasks currently stored in memory.",
 )
 def list_tasks() -> list[Task]:
-    return tasks
-
-
+    with get_db() as conn:
+        rows = conn.execute("SELECT * FROM tasks").fetchall()
+    return [row_to_task(row) for row in rows]
 @app.get(
     "/tasks/{task_id}",
     response_model=Task,
