@@ -168,10 +168,10 @@ def create_task(task_data: TaskCreate) -> Task | JSONResponse:
     title = task_data.title.strip()
     if not title:
         return JSONResponse(status_code=400, content={"error": "Title is required"})
-    next_id = max((task.id for task in tasks), default=0) + 1
-    new_task = Task(id=next_id, title=title, done=False)
-    tasks.append(new_task)
-    return new_task
+    with get_db() as conn:
+        cursor = conn.execute("INSERT INTO tasks (title, done) VALUES (?, ?)", (title, 0))
+        new_id = cursor.lastrowid
+    return Task(id=new_id, title=title, done=False)
 
 
 @app.put(
