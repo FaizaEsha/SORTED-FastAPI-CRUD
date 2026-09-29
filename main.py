@@ -46,12 +46,8 @@ class Task(BaseModel):
     done: bool = Field(examples=[False])
 
 
-# The assignment intentionally uses an in-memory list instead of a database.
-tasks: list[Task] = [
-    Task(id=1, title="Plan the week", done=False),
-    Task(id=2, title="Finish FastAPI assignment", done=False),
-    Task(id=3, title="Take an evening walk", done=True),
-]
+
+
 
 
 @contextmanager
@@ -139,7 +135,7 @@ def health_check() -> dict[str, str]:
     response_model=list[Task],
     tags=["Tasks"],
     summary="List every task",
-    description="Returns all tasks currently stored in memory.",
+    description="Returns all tasks currently stored in the SQLite database.",
 )
 def list_tasks() -> list[Task]:
     with get_db() as conn:
@@ -194,14 +190,19 @@ def update_task(
         return JSONResponse(status_code=400, content={"error": "Title cannot be empty"})
     if "done" in task_data.model_fields_set and task_data.done is None:
         return JSONResponse(status_code=400, content={"error": "Done must be true or false"})
+    new_title = task.title
     if task_data.title is not None:
         title = task_data.title.strip()
         if not title:
             return JSONResponse(status_code=400, content={"error": "Title cannot be empty"})
-        task.title = title
-    if task_data.done is not None:
-        task.done = task_data.done
-    return task
+        new_title = title
+    new_done = task.done if task_data.done is None else task_data.done
+    with get_db() as conn:
+        conn.execute(
+            "UPDATE tasks SET title = ?, done = ? WHERE id = ?",
+            (new_title, int(new_done), task_id),
+        )
+    return Task(id=task_id, title=new_title, done=new_done)
 
 
 @app.delete(
@@ -216,5 +217,6 @@ def delete_task(task_id: Annotated[int, PathParameter(ge=1, description="The tas
     task = get_task_or_404(task_id)
     if isinstance(task, JSONResponse):
         return task
-    tasks.remove(task)
+    with get_db() as conn:
+        conn.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
