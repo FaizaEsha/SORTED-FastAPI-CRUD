@@ -123,8 +123,16 @@ CRUD preservation, public routes, credential validation, safe responses, bad tok
 the reused guard, caller-specific logout, outages and OpenAPI bearer declarations.
 GitHub Actions runs the same checks on pushes and pull requests.
 
-Pending before claiming complete: real Supabase signup/login, curl flow, Swagger
-authorized flow and screenshot, pushing the branch, green GitHub checks and PR merge.
+Live verification on October 30, 2026: signup returned 201, the owner confirmed the
+email, login returned 200 with access and refresh tokens, both protected routes
+returned 200, missing/tampered tokens returned 401, and a wrong password returned
+401. Logout returned 204 with an empty body; token reuse after logout returned 401
+in this project. That observation does not guarantee every Supabase configuration
+immediately rejects every revoked JWT. A separate curl login/protected/tamper/logout
+flow passed, and Swagger Authorize + Try it out returned 200 for both protected routes.
+The root README includes real screenshots of locked routes and the authorized HTTP
+200 result, cropped to exclude passwords, bearer tokens and account metadata.
+
 The implementation was AI-assisted; no claim is made that stages were completed by
 hand. Six meaningful implementation commits separate configuration, authentication,
 integration, tests, CI and documentation. They do not fabricate the PDF's historical
@@ -134,6 +142,7 @@ features have not been submitted or claimed.
 ## 7. GitHub access
 
 Run `gh auth login`, select GitHub.com → HTTPS → Login with a web browser, and sign
-in as the repository owner. Never send a personal access token in chat. Changes stay
-on `feature/flyrank-a4-supabase-auth` until a pull request is tested and merged.
+in as the repository owner. Never send a personal access token in chat. This change
+was developed on `feature/flyrank-a4-supabase-auth` and submitted as pull request #1,
+with automated checks and live verification before merge.
 Existing Git history and ZIP backups are preserved. No force push is needed.
