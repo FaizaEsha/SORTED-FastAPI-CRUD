@@ -5,3 +5,7 @@ venv/
 .env
 .DS_Store
 tasks.db
+.pytest_cache/
+.env.*
+!.env.example
+.test-tmp*/
