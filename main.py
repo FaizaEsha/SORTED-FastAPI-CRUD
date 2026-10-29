@@ -9,6 +9,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from fastapi import HTTPException, Request
+from auth import router as auth_router
 
 
 app = FastAPI(
@@ -24,6 +26,12 @@ STATIC_DIRECTORY = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIRECTORY), name="static")
 # The database is just one file, created automatically next to main.py.
 DB_PATH = Path(__file__).parent / "tasks.db"
+app.include_router(auth_router)
+
+
+@app.exception_handler(HTTPException)
+async def http_error_handler(_, exc: HTTPException) -> JSONResponse:
+    return JSONResponse(status_code=exc.status_code, content={"error": exc.detail}, headers=exc.headers)
 
 class TaskCreate(BaseModel):
     """The information needed to create a task."""
@@ -105,8 +113,10 @@ def get_task_or_404(task_id: int) -> Task | JSONResponse:
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_error_handler(_, exc: RequestValidationError) -> JSONResponse:
+async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     """Use the assignment's required 400 response for an invalid request body."""
+    if request.url.path.startswith("/auth/"):
+        return JSONResponse(status_code=400, content={"error": "Email and password are required"})
     title_problem = any("title" in error["loc"] for error in exc.errors())
     message = "Title is required" if title_problem else "Invalid request body"
     return JSONResponse(status_code=400, content={"error": message})
