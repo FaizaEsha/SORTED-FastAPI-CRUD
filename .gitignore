@@ -8,3 +8,4 @@ tasks.db
 .pytest_cache/
 .env.*
 !.env.example
+.test-tmp*/
