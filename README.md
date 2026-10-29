@@ -172,7 +172,7 @@ Round one: tasks lived in the server's memory, so every restart wiped them and t
 
 ## Note
 
-Built to run locally as part of FlyRank's Backend AI Engineering Track. Storage is a single SQLite file on purpose. No accounts, authentication, or cloud deployment, since those would distract from the CRUD and database learning goals of this stage.
+Built to run locally as part of FlyRank's Backend AI Engineering Track. Storage is a single SQLite file on purpose. The original task dashboard and public CRUD behavior are preserved. FlyRank A4 adds Supabase authentication separately; see the setup guide below.
 
 ## Author
 
@@ -181,3 +181,9 @@ Built to run locally as part of FlyRank's Backend AI Engineering Track. Storage 
 ## License
 
 You're welcome to clone this, run it locally, and test it end to end, that's the best way to see how the CRUD cycle actually behaves. Please don't submit this code, or a lightly edited copy of it, as your own coursework; use it to learn from, not to hand in.
+
+## FlyRank A4: Supabase authentication
+
+Signup, login, caller-specific logout, verified profile and dashboard routes, and Swagger bearer authorization are now included. [Read the step-by-step setup, endpoint table, tests and remaining live checkpoints](docs/AUTH_SETUP.md).
+
+The task dashboard keeps its original design and SQLite storage. Task routes remain public and shared; user-specific task isolation is not part of this assignment. Real Supabase verification and the authorized Swagger screenshot are still pending configuration.
