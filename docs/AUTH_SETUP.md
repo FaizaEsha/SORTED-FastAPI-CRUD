@@ -1,4 +1,4 @@
-# FlyRank A4: authentication setup and verification
+# Authentication setup and verification
 
 This extends SORTED with Supabase Auth. The original dashboard, SQLite task table,
 task URLs and their behavior are preserved. Tasks remain the original shared public
