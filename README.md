@@ -151,6 +151,36 @@ FastAPI generates interactive docs automatically at `/docs` — no setup require
 ```
 
 ---
+## FlyRank A4: Supabase authentication
+
+Signup, login, caller-specific logout, verified profile and dashboard routes, and Swagger bearer authorization are now included. [Read the step-by-step setup, endpoint table and verification guide](docs/AUTH_SETUP.md).
+
+The task dashboard keeps its original design and SQLite storage. Task routes remain public and shared; user-specific task isolation is not part of this assignment.
+
+Copy `.env.example` to `.env`, set `SUPABASE_URL` and `SUPABASE_KEY` to your project's URL and public anon/publishable key, then install `requirements.txt`. Never use a secret/service_role key. Start everything with `uvicorn main:app --reload`. Confirm the signup email before logging in if email confirmation is enabled.
+
+| Method | Endpoint | Bearer token required | Success |
+|---|---|---|---|
+| POST | `/auth/signup` | No | 201 |
+| POST | `/auth/login` | No | 200 + access/refresh tokens |
+| POST | `/auth/logout` | Yes | 204 |
+| GET | `/protected/profile` | Yes | 200 + safe user metadata |
+| GET | `/protected/dashboard` | Yes | 200 |
+| GET | `/public/info` | No | 200 |
+
+Missing credentials return 400; missing, malformed or invalid tokens return 401. The protected routes share a dependency that verifies tokens with Supabase `get_user(token)`. Passwords are managed by Supabase. `.env` is ignored; the committed example contains placeholders only.
+
+**Verified on October 30, 2026:** real signup returned 201; confirmed-account login, profile and dashboard returned 200; missing/tampered tokens and a wrong password returned 401; logout returned an empty 204. The curl checks and authorized Swagger profile/dashboard calls passed. All 31 automated regression tests also passed.
+
+Swagger shows locked protected routes:
+
+![Swagger bearer authorization locks](docs/swagger_auth_locks.png)
+
+Real authorized dashboard HTTP 200 result (cropped to exclude tokens and account metadata):
+
+![Authorized Swagger dashboard returns 200](docs/swagger_auth.png)
+
+---
 
 ## 🕯️ The Mortality Experiment
 
@@ -182,31 +212,4 @@ Built to run locally as part of FlyRank's Backend AI Engineering Track. Storage 
 
 You're welcome to clone this, run it locally, and test it end to end, that's the best way to see how the CRUD cycle actually behaves. Please don't submit this code, or a lightly edited copy of it, as your own coursework; use it to learn from, not to hand in.
 
-## FlyRank A4: Supabase authentication
 
-Signup, login, caller-specific logout, verified profile and dashboard routes, and Swagger bearer authorization are now included. [Read the step-by-step setup, endpoint table and verification guide](docs/AUTH_SETUP.md).
-
-The task dashboard keeps its original design and SQLite storage. Task routes remain public and shared; user-specific task isolation is not part of this assignment.
-
-Copy `.env.example` to `.env`, set `SUPABASE_URL` and `SUPABASE_KEY` to your project's URL and public anon/publishable key, then install `requirements.txt`. Never use a secret/service_role key. Start everything with `uvicorn main:app --reload`. Confirm the signup email before logging in if email confirmation is enabled.
-
-| Method | Endpoint | Bearer token required | Success |
-|---|---|---|---|
-| POST | `/auth/signup` | No | 201 |
-| POST | `/auth/login` | No | 200 + access/refresh tokens |
-| POST | `/auth/logout` | Yes | 204 |
-| GET | `/protected/profile` | Yes | 200 + safe user metadata |
-| GET | `/protected/dashboard` | Yes | 200 |
-| GET | `/public/info` | No | 200 |
-
-Missing credentials return 400; missing, malformed or invalid tokens return 401. The protected routes share a dependency that verifies tokens with Supabase `get_user(token)`. Passwords are managed by Supabase. `.env` is ignored; the committed example contains placeholders only.
-
-**Verified on October 30, 2026:** real signup returned 201; confirmed-account login, profile and dashboard returned 200; missing/tampered tokens and a wrong password returned 401; logout returned an empty 204. The curl checks and authorized Swagger profile/dashboard calls passed. All 31 automated regression tests also passed.
-
-Swagger shows locked protected routes:
-
-![Swagger bearer authorization locks](docs/swagger_auth_locks.png)
-
-Real authorized dashboard HTTP 200 result (cropped to exclude tokens and account metadata):
-
-![Authorized Swagger dashboard returns 200](docs/swagger_auth.png)
