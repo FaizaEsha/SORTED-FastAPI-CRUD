@@ -14,10 +14,11 @@ It began as a whiteboard: tasks lived in memory and vanished on every restart. N
 
 - ✅ **Full CRUD** — create, list, read, update, and delete tasks
 - 🐍 **Python + FastAPI** — an approachable backend framework with automatic docs
-- 📛 **Correct status codes throughout** — `200`, `201`, `204`, `400`, `404`, each with a clear JSON error where it applies
+- 📛 **Correct status codes throughout** — `200`, `201`, `204`, `400`, `401`, `404`, each with a clear JSON error where it applies
 - 🛡️ **Server-side validation** — a missing or empty title is rejected before it ever reaches the database
 - 📚 **Swagger UI** — interactive docs and a full "Try it out" CRUD cycle at `/docs`
 - 🗄️ **SQLite storage** — data survives restarts, kept safe with parameterized `?` queries
+- 🔐 **Supabase authentication** — signup, login, and logout, with bearer-protected routes verified by Supabase
 - 🎨 **SORTED. dashboard** — a responsive personal task interface at `/app`
 - 🧪 **curl-testable** — every endpoint verified from the terminal, not just the browser
 
@@ -28,6 +29,7 @@ It began as a whiteboard: tasks lived in memory and vanished on every restart. N
 - **Python 3.10+**
 - **FastAPI** — API framework, with OpenAPI/Swagger built in
 - **SQLite** — a single-file database, built right into Python (`sqlite3`)
+- **Supabase Auth** — signup, login, logout, and token verification
 - **Uvicorn** — local dev server
 - **HTML, CSS, and JavaScript** — the SORTED. dashboard
 
@@ -142,16 +144,24 @@ FastAPI generates interactive docs automatically at `/docs` — no setup require
 │   ├── index.html       # SORTED. dashboard structure
 │   ├── styles.css       # Beige, brown, and black responsive styling
 │   └── app.js           # Frontend requests to the FastAPI CRUD endpoints
-├── docs/                # Screenshots (Swagger UI, DB Browser)
+├── docs/                # Screenshots (Swagger UI, DB Browser, auth) and AUTH_SETUP.md
+├── tests/
+│   └── test_api.py      # 31 automated regression tests (CRUD, dashboard, and auth)
+├── .github/workflows/
+│   └── tests.yml        # Runs the test suite on every push and pull request
 ├── main.py              # Models, database setup, routes, validation, error handling
+├── auth.py              # Supabase signup, login, logout, and protected routes
 ├── tasks.db             # created automatically, git-ignored
-├── requirements.txt     # FastAPI and Uvicorn
+├── .env.example         # Supabase placeholders only; copy to .env (git-ignored)
+├── requirements.txt     # FastAPI, Uvicorn, Supabase, and python-dotenv
+├── requirements-dev.txt # Adds pytest and httpx for testing
 ├── .gitignore
 └── README.md
 ```
 
 ---
-## Supabase Authentication
+
+## 🔐 Supabase Authentication
 
 Signup, login, caller-specific logout, verified profile and dashboard routes, and Swagger bearer authorization are now included. [Read the step-by-step setup, endpoint table and verification guide](docs/AUTH_SETUP.md).
 
@@ -197,12 +207,17 @@ Round one: tasks lived in the server's memory, so every restart wiped them and t
 - Using parameterized `?` queries, and seeding data only once so restarts never create duplicates
 - Reading and editing real rows by hand with SQL in DB Browser
 - Wiring a small frontend to a backend API with `fetch`
+- Letting Supabase Auth handle signup, login, and passwords instead of storing credentials myself
+- Protecting routes with one shared FastAPI dependency that verifies every bearer token with Supabase
+- Telling `400` (missing credentials) apart from `401` (missing, malformed, or invalid token)
+- Keeping secrets out of Git: a git-ignored `.env`, a placeholder-only `.env.example`, and never a `service_role` key
+- Using Swagger's **Authorize** button to test locked routes, and proving the flow with curl and automated regression tests
 
 ---
 
 ## Note
 
-Built to run locally as part of FlyRank's Backend AI Engineering Track. Storage is a single SQLite file on purpose. The original task dashboard and public CRUD behavior are preserved. FlyRank A4 adds Supabase authentication separately; see the setup guide below.
+Built to run locally as part of FlyRank's Backend AI Engineering Track. Storage is a single SQLite file on purpose. The original task dashboard and public CRUD behavior are preserved. FlyRank A4 adds Supabase authentication separately; see the setup guide above.
 
 ## Author
 
@@ -211,5 +226,3 @@ Built to run locally as part of FlyRank's Backend AI Engineering Track. Storage 
 ## License
 
 You're welcome to clone this, run it locally, and test it end to end, that's the best way to see how the CRUD cycle actually behaves. Please don't submit this code, or a lightly edited copy of it, as your own coursework; use it to learn from, not to hand in.
-
-
