@@ -151,7 +151,7 @@ FastAPI generates interactive docs automatically at `/docs` — no setup require
 ```
 
 ---
-## FlyRank A4: Supabase authentication
+## Supabase Authentication
 
 Signup, login, caller-specific logout, verified profile and dashboard routes, and Swagger bearer authorization are now included. [Read the step-by-step setup, endpoint table and verification guide](docs/AUTH_SETUP.md).
 
